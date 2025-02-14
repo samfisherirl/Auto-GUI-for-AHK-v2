@@ -33,7 +33,9 @@ Main() {
         , Sleep(1000)
     EAhwnd := findEasyAutoGUI(PID) ; Find and wait for Easy AutoGUI to launch
     while ProcessExist(PID) {
-        CheckConversionStatus()
+        filecontents := CheckConversionStatus()
+        if filecontents
+            ConvertandCompile(filecontents, ahkv2CodePath)
     }
     ExitApp()
 }
@@ -41,27 +43,17 @@ ExitApp()
 
 
 CheckConversionStatus() {
-    while ProcessExist(PID) {
         if FileExist(logsPath) {
             status := tryRead(logsPath)
             inscript := status != "" ? tryRead(ahkv1CodePath) : ""
             if (inscript != "") {
                 writer("", logsPath) ; Clear log file
-                try {
-                    ConvertandCompile(inscript, ahkv2CodePath)
-                }
-                catch as e {
-                    errorLogHandler(e.Message)
-                    sleep(5)
-                    continue
-                }
+                return inscript
             }
         } else {
             Sleep(10)
-            continue
+            return false
         }
-    }
-    ExitApp()
 }
 
 ; Convert script from AHK v1 to v2
